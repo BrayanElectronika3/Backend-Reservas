@@ -8,51 +8,29 @@ const getItems = async (req, res) => {
         const idTenant = req.headers.tenant
         const data = await configuracionServiciosModel.findAllData(idTenant)
 
-        if (!data?.dataValues && !data[0]?.dataValues) return res.send({ data: null })
+        if (!data || !data.length) {
+            return res.json({ data: null });
+        }
 
-        // Transformar los datos en la estructura deseada
-        const transformedData = {}
-        data.forEach(item => {            
-            // Obtener variables de la consulta
-            const serviceName = item.servicio ? item.servicio.nombre : 'Sin servicio'
-            const serviceId = item.servicio ? item.servicio.id : null
+        const transformedData = data.reduce((acc, item) => {
+            const {
+                servicio: { nombre: serviceName = 'Sin servicio', id: serviceId = null } = {},
+                categoria: { nombre: categoryName = 'Sin Categoria', id: categoryId = null } = {},
+                subCategoria: { nombre: subCategoryName = 'Sin Subcategoria', id: subCategoryId = null } = {}
+            } = item
 
-            const categoryName = item.categoria ? item.categoria.nombre : 'Sin Categoria'
-            const categoryId = item.categoria ? item.categoria.id : null
-
-            const subCategoryName = item.subCategoria ? item.subCategoria.nombre : 'Sin Subcategoria'
-            const subCategoryId = item.subCategoria ? item.subCategoria.id : null
-
-            // Se crea el objeto de servicio
-            if (!transformedData.servicios) {
-                transformedData.servicios = {}
-            }
-
+            acc.servicios = acc.servicios || {}
             // Aseguramos que el servicio exista dentro del servicio
-            if (!transformedData.servicios[serviceName]) {
-                transformedData.servicios[serviceName] = { 
-                    id: serviceId,
-                    categorias: {}
-                }
-            }
-
+            acc.servicios[serviceName] = acc.servicios[serviceName] || { id: serviceId, categorias: {} }
             // Aseguramos que la categoria exista dentro del servicio
-            if (!transformedData.servicios[serviceName].categorias[categoryName]) {
-                transformedData.servicios[serviceName].categorias[categoryName] = {
-                    id: categoryId, 
-                    subCategorias: {}
-                }
-            }
-
+            acc.servicios[serviceName].categorias[categoryName] = acc.servicios[serviceName].categorias[categoryName] || { id: categoryId, subCategorias: {} }
             // Agregamos la subcategoría si existe
-            if (!transformedData.servicios[serviceName].categorias[categoryName].subCategorias[subCategoryName]) {
-                transformedData.servicios[serviceName].categorias[categoryName].subCategorias[subCategoryName] = {
-                    id: subCategoryId,
-                }
-            }
-        })
+            acc.servicios[serviceName].categorias[categoryName].subCategorias[subCategoryName] = acc.servicios[serviceName].categorias[categoryName].subCategorias[subCategoryName] || { id: subCategoryId }
 
-        res.json({ data: transformedData })
+            return acc
+        }, {})
+
+        res.json({ data: transformedData });
 
     } catch (error) {
         console.error(`ERROR GET ITEMS SERVICIOS: ${error.message}`)
