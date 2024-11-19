@@ -12,7 +12,7 @@ const getItems = async (req, res) => {
 
         // Transformar los datos en la estructura deseada
         const transformedData = {}
-        data.forEach(item => {
+        data.forEach(item => {            
             // Obtener variables de la consulta
             const serviceName = item.servicio ? item.servicio.nombre : 'Sin servicio'
             const serviceId = item.servicio ? item.servicio.id : null
@@ -20,7 +20,7 @@ const getItems = async (req, res) => {
             const categoryName = item.categoria ? item.categoria.nombre : 'Sin Categoria'
             const categoryId = item.categoria ? item.categoria.id : null
 
-            const subCategoryName = item.subCategoria ? item.subCategoria.nombre : 'Sin subcategoria'
+            const subCategoryName = item.subCategoria ? item.subCategoria.nombre : 'Sin Subcategoria'
             const subCategoryId = item.subCategoria ? item.subCategoria.id : null
 
             // Se crea el objeto de servicio
@@ -40,16 +40,15 @@ const getItems = async (req, res) => {
             if (!transformedData.servicios[serviceName].categorias[categoryName]) {
                 transformedData.servicios[serviceName].categorias[categoryName] = {
                     id: categoryId, 
-                    subCategorias: [] 
+                    subCategorias: {}
                 }
             }
 
             // Agregamos la subcategoría si existe
-            if (subCategoryId) {
-                transformedData.servicios[serviceName].categorias[categoryName].subCategorias.push({
+            if (!transformedData.servicios[serviceName].categorias[categoryName].subCategorias[subCategoryName]) {
+                transformedData.servicios[serviceName].categorias[categoryName].subCategorias[subCategoryName] = {
                     id: subCategoryId,
-                    nombre: subCategoryName
-                })
+                }
             }
         })
 
