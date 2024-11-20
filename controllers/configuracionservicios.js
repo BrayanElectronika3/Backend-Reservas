@@ -1,18 +1,25 @@
 const { matchedData } = require('express-validator')
 const { handleHttpError } = require('../utils/handleError')
 const { sequelize } = require('../config/mysql')
-const { configuracionServiciosModel } = require('../models')
+const { configuracionServiciosModel, sedesModel } = require('../models')
 
 const getItems = async (req, res) => {
     try {
         const idTenant = req.headers.tenant
-        const data = await configuracionServiciosModel.findAllData(idTenant)
+        const dataConfig = await configuracionServiciosModel.findAllData(idTenant)
+        const dataHeadquarter = await sedesModel.findAllData(idTenant)
 
-        if (!data || !data.length) {
+        // Validar la existencia de los datos
+        if (!dataConfig || !dataConfig.length) {
             return res.json({ data: null });
         }
 
-        const transformedData = data.reduce((acc, item) => {
+        if (!dataHeadquarter || !dataHeadquarter.length) {
+            return res.json({ data: null });
+        }
+
+        // Crear objeto de servicio, categoria y subcategoria
+        const transformedData = dataConfig.reduce((acc, item) => {
             const {
                 servicio: { nombre: serviceName = 'Sin servicio', id: serviceId = null } = {},
                 categoria: { nombre: categoryName = 'Sin Categoria', id: categoryId = null } = {},
@@ -30,11 +37,18 @@ const getItems = async (req, res) => {
             return acc
         }, {})
 
+        // Crear objeto de sedes
+        transformedData.sedes = transformedData.sedes || {}
+        dataHeadquarter.filter(item => item.estado === 'ACTIVO').map(item => {
+            const { nombre, id, idEmpresa, estado } = item
+            transformedData.sedes[nombre] = transformedData.sedes[nombre] || { id, idEmpresa, estado }
+        }, {})
+
         res.json({ data: transformedData });
 
     } catch (error) {
         console.error(`ERROR GET ITEMS SERVICIOS: ${error.message}`)
-        handleHttpError(res, 'Error obtaining services data')
+        handleHttpError(res, 'Error obtaining configuration service data')
     }
 }
 
