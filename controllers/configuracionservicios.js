@@ -20,11 +20,11 @@ const getItems = async (req, res) => {
             } = item
 
             acc.servicios = acc.servicios || {}
-            // Aseguramos que el servicio exista dentro del servicio
+            // Aseguramos que el servicio exista dentro del objeto servicios
             acc.servicios[serviceName] = acc.servicios[serviceName] || { id: serviceId, categorias: {} }
-            // Aseguramos que la categoria exista dentro del servicio
+            // Aseguramos que la categoria exista dentro del objeto categorias
             acc.servicios[serviceName].categorias[categoryName] = acc.servicios[serviceName].categorias[categoryName] || { id: categoryId, subCategorias: {} }
-            // Agregamos la subcategoría si existe
+            // Aseguramos que la subcategoría exista dentro del objeto subcategorias
             acc.servicios[serviceName].categorias[categoryName].subCategorias[subCategoryName] = acc.servicios[serviceName].categorias[categoryName].subCategorias[subCategoryName] || { id: subCategoryId }
 
             return acc
