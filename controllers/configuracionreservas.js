@@ -47,17 +47,12 @@ const getItems = async (req, res) => {
     try {
         const { tenant: idTenant } = req.headers
 
-        const [services, headquarters] = await Promise.all([
-            serviciosModel.findAllData(idTenant),
-            sedesModel.findAllData(idTenant)
-        ])
-
-        if (!services?.length || !headquarters?.length) {
-            return res.json({ data: null })
+        const data = await configuracionReservasModel.findAllData(idTenant)
+        if (!data) { 
+            return handleHttpError(res, 'Records not found', 404)
         }
 
-        const data = buildResponseData(services, headquarters)
-        res.json({ data })
+        res.send({ data })
 
     } catch (error) {
         console.error(`ERROR GET ITEMS CONFIGURATION RESERVATIONS: ${error.message}`)
@@ -68,6 +63,7 @@ const getItems = async (req, res) => {
 // Controlador para obtener un único elemento
 const getItem = async (req, res) => {
     try {
+        // Validaciones iniciales
         const { tenant: idTenant } = req.headers
         const { id } = matchedData(req)
 
@@ -93,18 +89,31 @@ const getItem = async (req, res) => {
 const createItem = async (req, res) => {
     try {
         // Validaciones iniciales
+        const { tenant: idTenant } = req.headers
+
         if (!req.body || Object.keys(req.body).length === 0) { 
             return handleHttpError(res, "The request body is empty", 400)
         }
 
-        const { tenant: idTenant } = req.headers
         const { data: dataReq } = req.body
-
         if (!dataReq) {
             return handleHttpError(res, "Request body must include 'data' key", 400)
         }
 
-        const validationError = validateFields(dataReq) || validateDataTypes(dataReq, {
+        // Validación de campos requeridos
+        const requiredFields = [ 
+            "idServicio", "idSede", "slots", 
+            "lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo", 
+            "horaInicial", "horaFinal", "duracionReserva", "estado"
+        ]
+
+        const missingFields = requiredFields.filter((field) => dataReq[field] === null || dataReq[field] === undefined)
+        if (missingFields.length > 0) {
+            return handleHttpError(res, `Missing required fields: ${missingFields.join(", ")}`, 400)
+        }
+
+        // Validacion de tipos de datos
+        const validationError = validateDataTypes(dataReq, {
             idServicio: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'idServicio must be a positive number' },
             idSede: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'idSede must be a positive number' },
             slots: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'slots must be a positive number' },
@@ -118,6 +127,7 @@ const createItem = async (req, res) => {
             horaInicial: { validate: isValidTime, errorMessage: 'horaInicial must be a valid time (HH:mm:ss)' },
             horaFinal: { validate: isValidTime, errorMessage: 'horaFinal must be a valid time (HH:mm:ss)' },
             duracionReserva: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'duracionReserva must be a positive number' },
+            estado: { validate: (val) => ['ACTIVO', 'INACTIVO'].includes(val), errorMessage: 'estado must be either ACTIVO or INACTIVO' },
         })
 
         if (validationError) {
@@ -142,19 +152,19 @@ const createItem = async (req, res) => {
 // Controlador para actualizar un elemento
 const updateItem = async (req, res) => {
     try {
+        // Validaciones iniciales
+        const { tenant: idTenant } = req.headers
+
         if (!req.body || Object.keys(req.body).length === 0) { 
             return handleHttpError(res, "The request body is empty", 400)
         }
 
-        const { tenant: idTenant } = req.headers
         const { id } = req.params
-        const { data: dataReq } = req.body
-
-        // Validaciones iniciales
         if (!id) {
             return handleHttpError(res, 'The id is not found', 400)
         }
-
+        
+        const { data: dataReq } = req.body
         if (!dataReq) {
             return handleHttpError(res, "Request body must include 'data' key", 400)
         }
@@ -164,6 +174,7 @@ const updateItem = async (req, res) => {
             return handleHttpError(res, 'Record not found in configuration reservation', 404)
         }
 
+        // Validacion de tipos de datos
         const validationError = validateDataTypes(dataReq, {
             idServicio: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'idServicio must be a positive number' },
             idSede: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'idSede must be a positive number' },
@@ -178,6 +189,7 @@ const updateItem = async (req, res) => {
             horaInicial: { validate: isValidTime, errorMessage: 'horaInicial must be a valid time (HH:mm:ss)' },
             horaFinal: { validate: isValidTime, errorMessage: 'horaFinal must be a valid time (HH:mm:ss)' },
             duracionReserva: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'duracionReserva must be a positive number' },
+            estado: { validate: (val) => ['ACTIVO', 'INACTIVO'].includes(val), errorMessage: 'estado must be either ACTIVO or INACTIVO' },
         })
 
         if (validationError) {
@@ -196,4 +208,27 @@ const updateItem = async (req, res) => {
     }
 }
 
-module.exports = { getItems, getItem, createItem, updateItem }
+// Controlador para obtener múltiples elementos
+const getItemsConfig = async (req, res) => {
+    try {
+        const { tenant: idTenant } = req.headers
+
+        const [services, headquarters] = await Promise.all([
+            serviciosModel.findAllData(idTenant),
+            sedesModel.findAllData(idTenant)
+        ])
+
+        if (!services?.length || !headquarters?.length) {
+            return res.json({ data: null })
+        }
+
+        const data = buildResponseData(services, headquarters)
+        res.json({ data })
+
+    } catch (error) {
+        console.error(`ERROR GET ITEMS CONFIG CONFIGURATION RESERVATIONS: ${error.message}`)
+        handleHttpError(res, 'Error obtaining config configuration reservations data')
+    }
+}
+
+module.exports = { getItems, getItem, createItem, updateItem, getItemsConfig }

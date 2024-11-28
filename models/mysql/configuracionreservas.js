@@ -54,6 +54,10 @@ const ConfiguracionReservas = sequelize.define(
             allowNull: false,
             defaultValue: false
         },
+        estado: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         horaInicial:{
             type: DataTypes.TIME,
             allowNull:false
