@@ -8,12 +8,12 @@ const getItems = async (req, res) => {
         // Validar la existencia de los datos
         const dataService = await serviciosModel.findAllData(idTenant)
         if (!dataService || !dataService.length) {
-            return res.json({ data: null });
+            return res.json({ data: null })
         }
 
         const dataHeadquarter = await sedesModel.findAllData(idTenant)
         if (!dataHeadquarter || !dataHeadquarter.length) {
-            return res.json({ data: null });
+            return res.json({ data: null })
         }
 
         // Objeto global de respuesta
@@ -33,7 +33,7 @@ const getItems = async (req, res) => {
             transformedData.sedes[nombre] = transformedData.sedes[nombre] || { id, estado }
         }, {})
 
-        res.json({ data: transformedData });
+        res.json({ data: transformedData })
 
     } catch (error) {
         console.error(`ERROR GET ITEMS CONFIGURATION: ${error.message}`)

@@ -9,4 +9,4 @@ const validatorGetItem = [
     (req, res, next) => validateResults(req, res, next)
 ]
 
-module.exports = { validatorGetItem };
+module.exports = { validatorGetItem }

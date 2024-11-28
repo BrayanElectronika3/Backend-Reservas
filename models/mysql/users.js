@@ -126,7 +126,7 @@ User.updateSesion =async function (id, body) {
             estadoSesion:body.estadoSesion
         }, 
         { where: { id } }
-    );
+    )
 }
 
 User.belongsTo(Storage, { foreignKey:"idStorage"})
