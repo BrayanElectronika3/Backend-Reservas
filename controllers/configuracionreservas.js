@@ -2,17 +2,8 @@ const { handleHttpError } = require('../utils/handleError')
 const { matchedData } = require("express-validator") 
 const { serviciosModel, sedesModel, configuracionReservasModel } = require('../models')
 
+// Funcion para validar si es tiempo
 const isValidTime = (time) => /^([01]?[0-9]|2[0-3]):([0-5]?[0-9]):([0-5]?[0-9])$/.test(time)
-
-// Funcion para validar los campos
-const validateFields = (fields) => {
-    const missingFields = Object.entries(fields)
-        .filter(([, value]) => value === null || value === undefined)
-        .map(([key]) => key)
-    return missingFields.length > 0
-        ? `Missing required fields: ${missingFields.join(', ')}`
-        : null
-}
 
 // Funcion para validar los tipos de datos
 const validateDataTypes = (data, rules) => {
