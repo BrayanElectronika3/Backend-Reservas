@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
 
-const checkIdTenant = require('../middlewares/tenant')
-const { getItems, setItem } = require('../controllers/configuracion')
+const verifyIdTenant = require('../middlewares/tenant')
 
-router.get('/', checkIdTenant, getItems)
-router.post('/', checkIdTenant, setItem)
+const { getItems } = require('../controllers/configuracion')
+
+router.get('/', verifyIdTenant, getItems)
 
 module.exports = router

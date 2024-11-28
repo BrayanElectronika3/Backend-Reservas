@@ -11,6 +11,10 @@ const models = {
     areaatencionesModel: require(`${pathModels}/areaatenciones`),
     grupoServiciosModel: require(`${pathModels}/gruposervicios`),
     configuracionServiciosModel: require(`${pathModels}/configuracionservicios`),
+    usersModel: require(`${pathModels}/users`),
+    storageModel: require(`${pathModels}/storage`),
+    rolesModel:require(`${pathModels}/roles`),
+    configuracionReservasModel:require(`${pathModels}/configuracionreservas`),
 }
 
 module.exports = models
