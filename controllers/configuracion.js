@@ -1,7 +1,10 @@
 const { handleHttpError } = require('../utils/handleError')
+const { matchedData } = require("express-validator") 
 const { configuracionReservasModel } = require('../models')
 
-const getItems = async (req, res) => {
+const { addDays, format, parseISO } = require('date-fns')
+
+const getServicesAndHeadquearters = async (req, res) => {
     try {
         const idTenant = req.headers.tenant
 
@@ -41,9 +44,62 @@ const getItems = async (req, res) => {
         res.json({ data: { servicios: transformedData } })
 
     } catch (error) {
-        console.error(`ERROR GET ITEMS CONFIGURATION: ${error.message}`)
-        handleHttpError(res, 'Error obtaining configuration data')
+        console.error(`ERROR GET SERVICES AND HEADQUARTERS: ${error.message}`)
+        handleHttpError(res, 'Error obtaining services and headquearters data')
     }
 }
 
-module.exports = { getItems }
+const generateEnabledDates = (data) => {
+    // Mapear los dias de la semana con sus claves en el objeto que se obtiene de la base de datos
+    const daysWeek = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
+
+    // Obtener la fecha actual
+    const currentDate = new Date()
+
+    // Arreglo para almacenar las fechas habilitadas
+    const datesEnabled = []
+
+    // Iterar los proximos 7 días
+    for (let i = 0; i < 7; i++) {
+        const newcurrentDate = addDays(currentDate, i) // Sumar días a la fecha actual
+        const dayWeek = daysWeek[newcurrentDate.getDay()] // Obtener el día de la semana
+
+        // Verificar si el día está habilitado
+        if (data[dayWeek]) {
+            datesEnabled.push({
+                fecha: format(newcurrentDate, "yyyy-MM-dd"), // Formato de fecha ISO
+                horaInicial: data.horaInicial,
+                horaFinal: data.horaFinal,
+            })
+        }
+    }
+
+    return datesEnabled
+}
+
+const getServiceHours = async (req, res) => {
+    try {
+        // Validaciones iniciales
+        const idTenant = req.headers.tenant
+        const { id } = matchedData(req)
+
+        if (!id) {
+            return handleHttpError(res, 'The id is not found', 400)
+        }
+
+        const dataRecord = await configuracionReservasModel.findOneData(id, idTenant)
+        if (!dataRecord) { 
+            return handleHttpError(res, 'Record not found', 404)
+        }
+
+        const dates = generateEnabledDates(dataRecord)
+        
+        res.json({ data: dates })
+
+    } catch (error) {
+        console.error(`ERROR GET SERVICE HOURS: ${error.message}`)
+        handleHttpError(res, 'Error obtaining service hours data')
+    }
+}
+
+module.exports = { getServicesAndHeadquearters, getServiceHours }
