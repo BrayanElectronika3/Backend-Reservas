@@ -1,39 +1,44 @@
 const { handleHttpError } = require('../utils/handleError')
-const { sedesModel, serviciosModel } = require('../models')
+const { configuracionReservasModel } = require('../models')
 
 const getItems = async (req, res) => {
     try {
         const idTenant = req.headers.tenant
 
         // Validar la existencia de los datos
-        const dataService = await serviciosModel.findAllData(idTenant)
-        if (!dataService || !dataService.length) {
+        const dataConfigReservation = await configuracionReservasModel.findAllDataConfig(idTenant)
+        if (!dataConfigReservation || !dataConfigReservation.length) {
             return res.json({ data: null })
         }
 
-        const dataHeadquarter = await sedesModel.findAllData(idTenant)
-        if (!dataHeadquarter || !dataHeadquarter.length) {
-            return res.json({ data: null })
-        }
+        // Filtrar solo configuraciones activas
+        const activeConfigs = dataConfigReservation.filter(config => config.estado === 'ACTIVO')
 
-        // Objeto global de respuesta
-        const transformedData = {}
+        // Transformar los datos
+        const transformedData = activeConfigs.reduce((acc, config) => {
+            const { servicio, sede, id } = config
 
-        // Crear objeto de servicios
-        transformedData.servicios = transformedData.servicios || {}
-        dataService.filter(item => item.estado === 'ACTIVO').map(item => {
-            const { nombre, id, estado } = item
-            transformedData.servicios[nombre] = transformedData.servicios[nombre] || { id, estado }
+            // Si el servicio no existe en la estructura, inicialízalo
+            if (!acc[servicio.nombre]) {
+                acc[servicio.nombre] = {
+                    idServicio: servicio.id,
+                    sedes: {}
+                }
+            }
+
+            // Si la sede no existe bajo el servicio, inicialízala
+            if (!acc[servicio.nombre].sedes[sede.nombre]) {
+                acc[servicio.nombre].sedes[sede.nombre] = {
+                    idSede: sede.id,
+                    idConfiguracionReservas: id
+                }
+            }
+
+            return acc
         }, {})
 
-        // Crear objeto de sedes
-        transformedData.sedes = transformedData.sedes || {}
-        dataHeadquarter.filter(item => item.estado === 'ACTIVO').map(item => {
-            const { nombre, id, estado } = item
-            transformedData.sedes[nombre] = transformedData.sedes[nombre] || { id, estado }
-        }, {})
-
-        res.json({ data: transformedData })
+        // Envolver en el objeto esperado por el frontend
+        res.json({ data: { servicios: transformedData } })
 
     } catch (error) {
         console.error(`ERROR GET ITEMS CONFIGURATION: ${error.message}`)

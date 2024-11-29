@@ -1,6 +1,9 @@
 const { DataTypes } = require('sequelize')
 const { sequelize } = require('../../config/mysql')
 
+const Servicio = require('./servicios')
+const Sede = require('./sedes')
+
 const ConfiguracionReservas = sequelize.define(
     'configuracionreservas',
     {
@@ -58,6 +61,9 @@ const ConfiguracionReservas = sequelize.define(
             type: DataTypes.STRING,
             allowNull: false
         },
+        descripcion: {
+            type: DataTypes.STRING,
+        },
         horaInicial:{
             type: DataTypes.TIME,
             allowNull:false
@@ -91,5 +97,29 @@ ConfiguracionReservas.findByIdAndUpdate = async function (id, body) {
 ConfiguracionReservas.findAllDataByTenantServiceHeadquarters = async function (idTenant, idServicio, idSede) {
     return await ConfiguracionReservas.findAll({ where: { idTenant, idServicio, idSede } })
 }
+
+ConfiguracionReservas.findAllDataConfig = async function (idTenant) {
+    return await ConfiguracionReservas.findAll({
+        include: [
+            {
+                model: Servicio,
+                as: 'servicio',
+                attributes: ['id','nombre'],
+                where: { estado: 'ACTIVO' }
+            },
+            {
+                model: Sede,
+                as: 'sede',
+                attributes: ['id','nombre'],
+                where: { estado: 'ACTIVO' }
+            },
+        ],
+        attributes: ['id', 'idServicio', 'idSede', 'estado'],
+        where: { idTenant }
+    }) 
+}
+
+ConfiguracionReservas.belongsTo(Servicio, { foreignKey: 'idServicio' })
+ConfiguracionReservas.belongsTo(Sede, { foreignKey: 'idSede' })
 
 module.exports = ConfiguracionReservas

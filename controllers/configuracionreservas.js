@@ -119,6 +119,7 @@ const createItem = async (req, res) => {
             horaFinal: { validate: isValidTime, errorMessage: 'horaFinal must be a valid time (HH:mm:ss)' },
             duracionReserva: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'duracionReserva must be a positive number' },
             estado: { validate: (val) => ['ACTIVO', 'INACTIVO'].includes(val), errorMessage: 'estado must be either ACTIVO or INACTIVO' },
+            descripcion: { validate: (val) => typeof val === 'string', errorMessage: 'descripcion must be string' },
         })
 
         if (validationError) {
@@ -181,6 +182,7 @@ const updateItem = async (req, res) => {
             horaFinal: { validate: isValidTime, errorMessage: 'horaFinal must be a valid time (HH:mm:ss)' },
             duracionReserva: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'duracionReserva must be a positive number' },
             estado: { validate: (val) => ['ACTIVO', 'INACTIVO'].includes(val), errorMessage: 'estado must be either ACTIVO or INACTIVO' },
+            descripcion: { validate: (val) => typeof val === 'string', errorMessage: 'descripcion must be string' },
         })
 
         if (validationError) {
