@@ -1,9 +1,9 @@
 const { handleHttpError } = require('../utils/handleError')
 const { matchedData } = require("express-validator") 
 const { configuracionReservasModel } = require('../models')
+const { generateEnabledDates, generateSchedule } = require('../utils/handleDate')
 
-const { addDays, format, parseISO } = require('date-fns')
-
+// Contralador para obtener los servicios y las sedes
 const getServicesAndHeadquearters = async (req, res) => {
     try {
         const idTenant = req.headers.tenant
@@ -49,34 +49,7 @@ const getServicesAndHeadquearters = async (req, res) => {
     }
 }
 
-const generateEnabledDates = (data) => {
-    // Mapear los dias de la semana con sus claves en el objeto que se obtiene de la base de datos
-    const daysWeek = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
-
-    // Obtener la fecha actual
-    const currentDate = new Date()
-
-    // Arreglo para almacenar las fechas habilitadas
-    const datesEnabled = []
-
-    // Iterar los proximos 7 días
-    for (let i = 0; i < 7; i++) {
-        const newcurrentDate = addDays(currentDate, i) // Sumar días a la fecha actual
-        const dayWeek = daysWeek[newcurrentDate.getDay()] // Obtener el día de la semana
-
-        // Verificar si el día está habilitado
-        if (data[dayWeek]) {
-            datesEnabled.push({
-                fecha: format(newcurrentDate, "yyyy-MM-dd"), // Formato de fecha ISO
-                horaInicial: data.horaInicial,
-                horaFinal: data.horaFinal,
-            })
-        }
-    }
-
-    return datesEnabled
-}
-
+// Controlador para obtener los dias y horas de servicio de reservas
 const getServiceHours = async (req, res) => {
     try {
         // Validaciones iniciales
@@ -92,9 +65,10 @@ const getServiceHours = async (req, res) => {
             return handleHttpError(res, 'Record not found', 404)
         }
 
-        const dates = generateEnabledDates(dataRecord)
-        
-        res.json({ data: dates })
+        const datesEnabled = generateEnabledDates(dataRecord)
+        const schedule = generateSchedule(datesEnabled, dataRecord.horaInicial, dataRecord.horaFinal, dataRecord.duracionReserva)
+
+        res.json({ data: { fechas: schedule } })
 
     } catch (error) {
         console.error(`ERROR GET SERVICE HOURS: ${error.message}`)
