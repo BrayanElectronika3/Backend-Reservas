@@ -68,7 +68,7 @@ const getServiceHours = async (req, res) => {
         const datesEnabled = generateEnabledDates(dataRecord)
         const schedule = generateSchedule(datesEnabled, dataRecord.horaInicial, dataRecord.horaFinal, dataRecord.duracionReserva)
 
-        res.json({ data: { fechas: schedule } })
+        res.json({ data: { fechas: schedule, duracionReserva: dataRecord.duracionReserva } })
 
     } catch (error) {
         console.error(`ERROR GET SERVICE HOURS: ${error.message}`)
