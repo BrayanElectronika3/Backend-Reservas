@@ -31,6 +31,10 @@ const Reservas = sequelize.define(
         duracionReserva: {
             type: DataTypes.INTEGER,
             allowNull: false
+        },
+        terminosCondiciones: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true
         }
     },
     {

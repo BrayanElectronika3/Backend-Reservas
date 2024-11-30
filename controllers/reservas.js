@@ -1,6 +1,7 @@
-const { handleHttpError } = require('../utils/handleError')
 const { matchedData } = require("express-validator") 
+const { handleHttpError } = require('../utils/handleError')
 const { reservasModel } = require('../models')
+const { parseTime, convertToBogotaDate } = require('../utils/handleDate')
 
 const isValidDate = (date) => {
     const parsedDate = typeof date === 'string' ? new Date(date) : date
@@ -85,6 +86,9 @@ const createItem = async (req, res) => {
             return handleHttpError(res, `Missing required fields: ${missingFields.join(", ")}`, 400)
         }
 
+        // Transformar time a un valor valido
+        dataReq.horaReserva =  parseTime(dataReq.horaReserva)
+
         // Validacion de tipos de datos
         const validationError = validateDataTypes(dataReq, {
             idPersona: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'idPersona must be a positive number' },
@@ -98,12 +102,17 @@ const createItem = async (req, res) => {
         if (validationError) {
             return handleHttpError(res, validationError, 400)
         }
-
+        
+        // Consultar si ya existe una reserva
         const existingReservation = await reservasModel.findOneDataByTenantPersonDate(idTenant, dataReq.idPersona, dataReq.fechaReserva)
         if (existingReservation) {
             return handleHttpError(res, 'There is already a reservation for the same person on the same date', 400)
         }
 
+        // Transformar date a un valor valido
+        dataReq.fechaReserva = convertToBogotaDate(dataReq.fechaReserva)
+
+        // Guardar el registro y retornar los datos
         const dataRecord = await reservasModel.create({ ...dataReq, idTenant })
         const { idTenant: tenant, createdAt, updatedAt, ...data } = dataRecord.dataValues
         res.status(201).json({ data })
@@ -138,6 +147,9 @@ const updateItem = async (req, res) => {
             return handleHttpError(res, 'Record not found in reservation', 404)
         }
 
+        // Transformar time a un valor valido
+        dataReq.horaReserva =  parseTime(dataReq.horaReserva)
+
         // Validacion de tipos de datos
         const validationError = validateDataTypes(dataReq, {
             fechaReserva: { validate: isValidDate, errorMessage: 'fechaReserva must be a valid date' },
@@ -148,8 +160,13 @@ const updateItem = async (req, res) => {
             return handleHttpError(res, validationError, 400)
         }
 
+        // Transformar date a un valor valido
+        dataReq.fechaReserva = convertToBogotaDate(dataReq.fechaReserva)
+
+        // Actualizar el registro
         await reservasModel.findByIdAndUpdate(id, dataReq)
 
+        // Consultar si ya existe una reserva
         const updatedRecord = await reservasModel.findOneData(id, idTenant)
         const { idTenant: tenant, createdAt, updatedAt, ...data } = updatedRecord.dataValues
         res.status(200).json({ data })

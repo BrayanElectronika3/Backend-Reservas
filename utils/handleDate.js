@@ -61,4 +61,55 @@ const generateSchedule = (datesEnabled, horaInicial, horaFinal, duracionReserva)
     return schedule
 }
 
-module.exports = { generateEnabledDates, generateSchedule }
+// Parsear un time con formato 00:00 AM/PM a 00:00:00
+const parseTime = (timeStr) => {
+    const timeRegex = /^(\d{1,2}):([0-5]\d)\s?(AM|PM)$/i
+    const match = timeStr.match(timeRegex)
+
+    if (!match) {
+        throw new Error("Invalid time format. It should be 'h:mm AM/PM'.")
+    }
+
+    const [_, hourStr, minuteStr, period] = match
+
+    let hours = parseInt(hourStr, 10)
+    // const minutes = parseInt(minuteStr, 10)
+
+    // Ajustar horas segun el periodo AM/PM
+    if (period.toUpperCase() === 'PM' && hours !== 12) {
+        hours += 12
+    } else if (period.toUpperCase() === 'AM' && hours === 12) {
+        hours = 0
+    }
+
+    // Formatear en "HH:mm:ss"
+    const formattedTime = `${hours.toString().padStart(2, '0')}:${minuteStr.padStart(2, '0')}:00`
+    return formattedTime
+}
+
+// Convertir a la zona horaria de bogota un string tipo date 2024-01-01
+const convertToBogotaDate = (dateStr) => {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+    if (!dateRegex.test(dateStr)) {
+        throw new Error('Formato de fecha inválido. Debe ser "YYYY-MM-DD".')
+    }
+  
+    // Separar el año, mes y día
+    const [year, month, day] = dateStr.split('-').map(Number)
+  
+    // Crear la fecha ajustada para la zona horaria "America/Bogota"
+    const bogotaDate = new Date(Date.UTC(year, month - 1, day))
+  
+    // Ajustar la hora a la zona horaria de Bogotá
+    const timeZoneOffset = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Bogota',
+      hour: 'numeric',
+      hour12: false,
+    }).formatToParts(bogotaDate).find(part => part.type === 'hour').value
+  
+    // Ajustar la hora al inicio del día en Bogotá
+    bogotaDate.setUTCHours(timeZoneOffset, 0, 0, 0)  
+    return bogotaDate
+}
+
+module.exports = { generateEnabledDates, generateSchedule, parseTime, convertToBogotaDate }
