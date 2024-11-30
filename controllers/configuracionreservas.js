@@ -196,7 +196,7 @@ const updateItem = async (req, res) => {
         res.status(200).json({ data })
 
     } catch (error) {
-        console.error(`ERROR UPDATE ITEM CONFIGURAITON RESERVATION: ${error.message}`)
+        console.error(`ERROR UPDATE ITEM CONFIGURATION RESERVATION: ${error.message}`)
         handleHttpError(res, 'Error updating configuration reservation')
     }
 }

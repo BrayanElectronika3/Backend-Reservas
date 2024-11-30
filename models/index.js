@@ -15,6 +15,7 @@ const models = {
     storageModel: require(`${pathModels}/storage`),
     rolesModel:require(`${pathModels}/roles`),
     configuracionReservasModel:require(`${pathModels}/configuracionreservas`),
+    reservasModel:require(`${pathModels}/reservas`),
 }
 
 module.exports = models
