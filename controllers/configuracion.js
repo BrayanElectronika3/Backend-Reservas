@@ -51,7 +51,7 @@ const getServicesAndHeadquearters = async (req, res) => {
 }
 
 // Controlador para obtener los dias y horas de servicio de reservas
-const getServiceHours = async (req, res) => {
+const getDaysHoursService = async (req, res) => {
     try {
         // Validaciones iniciales
         const idTenant = req.headers.tenant
@@ -81,4 +81,4 @@ const getServiceHours = async (req, res) => {
     }
 }
 
-module.exports = { getServicesAndHeadquearters, getServiceHours }
+module.exports = { getServicesAndHeadquearters, getDaysHoursService }

@@ -3,11 +3,11 @@ const router = express.Router()
 
 const verifyIdTenant = require('../middlewares/tenant')
 
-const { getServicesAndHeadquearters, getServiceHours } = require('../controllers/configuracion')
+const { getServicesAndHeadquearters, getDaysHoursService } = require('../controllers/configuracion')
 
 const { validatorGetItem } = require('../validators/configuracion')
 
 router.get('/serviceheadquarters', verifyIdTenant, getServicesAndHeadquearters)
-router.get('/servicehours/:id', verifyIdTenant, validatorGetItem, getServiceHours)
+router.get('/daysHoursService/:id', verifyIdTenant, validatorGetItem, getDaysHoursService)
 
 module.exports = router
