@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize')
+const { DataTypes, Op } = require('sequelize')
 const { sequelize } = require('../../config/mysql')
 
 const Reservas = sequelize.define(
@@ -56,6 +56,14 @@ Reservas.findByIdAndUpdate = async function (id, body) {
 
 Reservas.findOneDataByTenantPersonDate = async function (idTenant, idPersona, fechaReserva) {
     return await Reservas.findOne({ where: { idTenant, idPersona, fechaReserva } })
+}
+
+Reservas.findAllDataByTenantDates = async function (idTenant, fechasReserva) {
+    if (!Array.isArray(fechasReserva) || fechasReserva.length === 0) {
+        throw new Error("La lista de fechas de reserva debe ser un array no vacio.");
+    }
+
+    return await Reservas.findAll({ where: { idTenant, fechaReserva: { [Op.in]: fechasReserva } } })
 }
 
 module.exports = Reservas

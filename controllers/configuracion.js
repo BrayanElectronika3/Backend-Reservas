@@ -1,7 +1,8 @@
 const { handleHttpError } = require('../utils/handleError')
 const { matchedData } = require("express-validator") 
-const { configuracionReservasModel } = require('../models')
+const { configuracionReservasModel, reservasModel } = require('../models')
 const { generateEnabledDates, generateSchedule } = require('../utils/handleDate')
+const { removeOccupiedSlots } = require('../utils/handleSchedule')
 
 // Contralador para obtener los servicios y las sedes
 const getServicesAndHeadquearters = async (req, res) => {
@@ -67,8 +68,12 @@ const getServiceHours = async (req, res) => {
 
         const datesEnabled = generateEnabledDates(dataRecord)
         const schedule = generateSchedule(datesEnabled, dataRecord.horaInicial, dataRecord.horaFinal, dataRecord.duracionReserva)
+        const datesBusy = await reservasModel.findAllDataByTenantDates(idTenant, Object.keys(schedule))
+        
+        // Actualizar `schedule` eliminando horas ocupadas
+        const updatedSchedule = removeOccupiedSlots(schedule, datesBusy, dataRecord.slots)
 
-        res.json({ data: { fechas: schedule, duracionReserva: dataRecord.duracionReserva } })
+        res.json({ data: { fechas: updatedSchedule, duracionReserva: dataRecord.duracionReserva } })
 
     } catch (error) {
         console.error(`ERROR GET SERVICE HOURS: ${error.message}`)
