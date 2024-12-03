@@ -68,7 +68,7 @@ const getDaysHoursService = async (req, res) => {
 
         const datesEnabled = generateEnabledDates(dataRecord)
         const schedule = generateSchedule(datesEnabled, dataRecord.horaInicial, dataRecord.horaFinal, dataRecord.duracionReserva)
-        const datesBusy = await reservasModel.findAllDataByTenantDates(idTenant, Object.keys(schedule))
+        const datesBusy = await reservasModel.findAllDataByTenantDates(idTenant, Object.keys(schedule), 'ACTIVO')
         
         // Actualizar `schedule` eliminando horas ocupadas
         const updatedSchedule = removeOccupiedSlots(schedule, datesBusy, dataRecord.slots)

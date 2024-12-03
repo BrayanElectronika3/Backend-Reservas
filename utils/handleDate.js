@@ -112,4 +112,12 @@ const convertToBogotaDate = (dateStr) => {
     return bogotaDate
 }
 
-module.exports = { generateEnabledDates, generateSchedule, parseTime, convertToBogotaDate }
+// Convertir a formato 12 horas
+const formatTo12Hour = (time) => {
+    const [hours, minutes, seconds] = time.split(":").map(Number)
+    const period = hours >= 12 ? "PM" : "AM"
+    const hours12 = hours % 12 || 12
+    return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`
+}
+
+module.exports = { generateEnabledDates, generateSchedule, parseTime, convertToBogotaDate, formatTo12Hour }

@@ -1,7 +1,7 @@
 const { matchedData } = require("express-validator") 
 const { handleHttpError } = require('../utils/handleError')
 const { reservasModel } = require('../models')
-const { parseTime, convertToBogotaDate } = require('../utils/handleDate')
+const { parseTime, convertToBogotaDate, formatTo12Hour } = require('../utils/handleDate')
 
 const isValidDate = (date) => {
     const parsedDate = typeof date === 'string' ? new Date(date) : date
@@ -79,7 +79,7 @@ const createItem = async (req, res) => {
         }
 
         // Validación de campos requeridos
-        const requiredFields = [ "idPersona", "idServicio", "idSede", "fechaReserva", "horaReserva",  "duracionReserva" ]
+        const requiredFields = [ "idPersona", "idServicio", "idSede", "fechaReserva", "horaReserva",  "duracionReserva", "estado" ]
 
         const missingFields = requiredFields.filter((field) => dataReq[field] === null || dataReq[field] === undefined)
         if (missingFields.length > 0) {
@@ -97,6 +97,7 @@ const createItem = async (req, res) => {
             fechaReserva: { validate: isValidDate, errorMessage: 'fechaReserva must be a valid date' },
             horaReserva: { validate: isValidTime, errorMessage: 'horaReserva must be a valid time (HH:mm:ss)' },
             duracionReserva: { validate: (val) => typeof val === 'number' && val > 0, errorMessage: 'duracionReserva must be a positive number' },
+            estado: { validate: (val) => typeof val === 'string' && val !== '', errorMessage: 'estado must be a string' },
         })
 
         if (validationError) {
@@ -104,7 +105,7 @@ const createItem = async (req, res) => {
         }
         
         // Consultar si ya existe una reserva
-        const existingReservation = await reservasModel.findOneDataByTenantPersonDate(idTenant, dataReq.idPersona, dataReq.fechaReserva)
+        const existingReservation = await reservasModel.findOneDataByTenantPersonDate(idTenant, dataReq.idPersona, dataReq.fechaReserva, 'ACTIVO')
         if (existingReservation) {
             return handleHttpError(res, 'There is already a reservation for the same person on the same date', 400)
         }
@@ -154,6 +155,7 @@ const updateItem = async (req, res) => {
         const validationError = validateDataTypes(dataReq, {
             fechaReserva: { validate: isValidDate, errorMessage: 'fechaReserva must be a valid date' },
             horaReserva: { validate: isValidTime, errorMessage: 'horaReserva must be a valid time (HH:mm:ss)' },
+            estado: { validate: (val) => typeof val === 'string' && val !== '', errorMessage: 'estado must be a string' },
         })
 
         if (validationError) {
@@ -177,4 +179,34 @@ const updateItem = async (req, res) => {
     }
 }
 
-module.exports = { getItems, getItem, createItem, updateItem }
+// Controlador para obtener las reservas por persona y tenant
+const getItemsPerson = async (req, res) => {
+    try {        
+        const { tenant: idTenant } = req.headers
+        const { idPerson } = matchedData(req)
+
+        if (!idPerson) {
+            return handleHttpError(res, 'The idPerson is not found', 400)
+        }
+
+        const data = await reservasModel.findAllDataByperson(idTenant, idPerson, 'ACTIVO')
+
+        if (!data) { 
+            return handleHttpError(res, 'Records by person not found', 404)
+        }
+
+        const transformedData = data.map((item) => item.get({ plain: true }))
+        const transformData = transformedData.map((item) => ({
+            ...item,
+            horaReserva: formatTo12Hour(item.horaReserva),
+        }))
+
+        res.send({ data: transformData })
+
+    } catch (error) {
+        console.error(`ERROR GET ITEM RESERVATIONS BY PERSON: ${error.message}`)
+        handleHttpError(res, 'Error retrieving item reservations by person')
+    }
+}
+
+module.exports = { getItems, getItem, createItem, updateItem, getItemsPerson }

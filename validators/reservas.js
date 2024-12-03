@@ -6,4 +6,9 @@ const validatorGetItem = [
     (req, res, next) => validateResults(req, res, next)
 ]
 
-module.exports = { validatorGetItem }
+const validatorGetItemPerson = [
+    check("idPerson").exists().notEmpty(),
+    (req, res, next) => validateResults(req, res, next)
+]
+
+module.exports = { validatorGetItem, validatorGetItemPerson }

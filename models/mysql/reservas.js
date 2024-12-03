@@ -1,6 +1,9 @@
 const { DataTypes, Op } = require('sequelize')
 const { sequelize } = require('../../config/mysql')
 
+const Servicio = require('./servicios')
+const Sede = require('./sedes')
+
 const Reservas = sequelize.define(
     'reservas',
     {
@@ -35,7 +38,11 @@ const Reservas = sequelize.define(
         terminosCondiciones: {
             type: DataTypes.BOOLEAN,
             defaultValue: true
-        }
+        },
+        estado: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
     },
     {
         timestamps: true
@@ -54,16 +61,40 @@ Reservas.findByIdAndUpdate = async function (id, body) {
     return await Reservas.update(body, { where: { id } })
 }
 
-Reservas.findOneDataByTenantPersonDate = async function (idTenant, idPersona, fechaReserva) {
-    return await Reservas.findOne({ where: { idTenant, idPersona, fechaReserva } })
+Reservas.findOneDataByTenantPersonDate = async function (idTenant, idPersona, fechaReserva, estado) {
+    return await Reservas.findOne({ where: { idTenant, idPersona, estado, fechaReserva } })
 }
 
-Reservas.findAllDataByTenantDates = async function (idTenant, fechasReserva) {
+Reservas.findAllDataByTenantDates = async function (idTenant, fechasReserva, estado) {
     if (!Array.isArray(fechasReserva) || fechasReserva.length === 0) {
         throw new Error("La lista de fechas de reserva debe ser un array no vacio.");
     }
 
-    return await Reservas.findAll({ where: { idTenant, fechaReserva: { [Op.in]: fechasReserva } } })
+    return await Reservas.findAll({ where: { idTenant, estado, fechaReserva: { [Op.in]: fechasReserva } } })
 }
+
+Reservas.findAllDataByperson = async function (idTenant, idPersona, estado) {    
+    return await Reservas.findAll({ 
+        include: [
+            {
+                model: Servicio,
+                as: 'servicio',
+                attributes: ['id','nombre'],
+                where: { estado: 'ACTIVO' }
+            },
+            {
+                model: Sede,
+                as: 'sede',
+                attributes: ['id','nombre'],
+                where: { estado: 'ACTIVO' }
+            },
+        ],
+        attributes: ['id', 'idPersona', 'idTenant', 'fechaReserva', 'horaReserva'],
+        where: { idTenant, idPersona, estado } 
+    })
+}
+
+Reservas.belongsTo(Servicio, { foreignKey: 'idServicio' })
+Reservas.belongsTo(Sede, { foreignKey: 'idSede' })
 
 module.exports = Reservas
