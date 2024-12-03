@@ -68,4 +68,8 @@ Persona.findByIdAndUpdate = async function (id, body) {
     return await Persona.update(body, { where: { id } })
 }
 
+Persona.findOneDataByDocument = async function (document) {
+    return await Persona.findOne({ where: { identificacion: document } })
+}
+
 module.exports = Persona

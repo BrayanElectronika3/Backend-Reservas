@@ -1,9 +1,12 @@
 const express = require('express')
 const router = express.Router()
 
-const { validatorConsultarItem } = require('../validators/personas')
-const { getPersona } = require('../controllers/personas')
+const verifyIdTenant = require("../middlewares/tenant")
 
-router.post('/consultar', validatorConsultarItem, getPersona)
+const { validatorConsultItem, validatorCreateItem } = require('../validators/personas')
+const { getPersona, createItem } = require('../controllers/personas')
+
+router.post('/consultar', validatorConsultItem, getPersona)
+router.post("/", verifyIdTenant, validatorCreateItem, createItem)
 
 module.exports = router
