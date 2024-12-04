@@ -94,8 +94,8 @@ ConfiguracionReservas.findByIdAndUpdate = async function (id, body) {
     return await ConfiguracionReservas.update(body, { where: { id } })
 }
 
-ConfiguracionReservas.findAllDataByTenantServiceHeadquarters = async function (idTenant, idServicio, idSede) {
-    return await ConfiguracionReservas.findAll({ where: { idTenant, idServicio, idSede } })
+ConfiguracionReservas.findOneDataByTenantServiceHeadquarters = async function (idTenant, idServicio, idSede) {
+    return await ConfiguracionReservas.findOne({ where: { idTenant, idServicio, idSede } })
 }
 
 ConfiguracionReservas.findAllDataConfig = async function (idTenant) {

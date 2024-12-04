@@ -126,8 +126,8 @@ const createItem = async (req, res) => {
             return handleHttpError(res, validationError, 400)
         }
 
-        const existingConfig = await configuracionReservasModel.findAllDataByTenantServiceHeadquarters(idTenant, dataReq.idServicio, dataReq.idSede)
-        if (existingConfig.length > 0) {
+        const existingConfig = await configuracionReservasModel.findOneDataByTenantServiceHeadquarters(idTenant, dataReq.idServicio, dataReq.idSede)
+        if (existingConfig) {
             return handleHttpError(res, 'Configuration with same service and headquarters already exists', 400)
         }
 
