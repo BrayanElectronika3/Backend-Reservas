@@ -81,4 +81,31 @@ const getDaysHoursService = async (req, res) => {
     }
 }
 
-module.exports = { getServicesAndHeadquearters, getDaysHoursService }
+// Controlador para obtener los dias y horas de servicio de reservas
+const getConfig = async (req, res) => {
+    try {
+        // Validaciones iniciales
+        const { tenant: idTenant } = req.headers
+        req = matchedData(req)
+        const { idServicio, idSede } = req
+
+        const dataRecord = await configuracionReservasModel.findOneDataByTenantServiceHeadquarters(idTenant, idServicio, idSede)
+        if (!dataRecord) { 
+            return handleHttpError(res, 'Record not found', 404)
+        }
+
+        const data = {
+            id: dataRecord.id,
+            duracionReserva: dataRecord.duracionReserva,
+            estado: dataRecord.estado,
+        }
+
+        res.json({ data })
+
+    } catch (error) {
+        console.error(`ERROR GET CONFIG: ${error.message}`)
+        handleHttpError(res, 'Error obtaining config data')
+    }
+}
+
+module.exports = { getServicesAndHeadquearters, getDaysHoursService, getConfig }
