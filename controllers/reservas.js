@@ -225,6 +225,18 @@ const updateItem = async (req, res) => {
         // Consultar el registro actualizado de la reserva
         const updatedRecord = await reservasModel.findOneData(id, idTenant)
         const { idTenant: tenant, createdAt, updatedAt, ...data } = updatedRecord.dataValues
+
+        // Enviar la confirmacion de la actualizacion de la reserva por correo
+        if (data?.idPersona && data?.id && idTenant) {
+            const [personData, reservationData] = await Promise.all([
+                getPersonData(data.idPersona),
+                getReservationData(data.id, idTenant),
+            ])
+
+            const mailData = buildMailData(personData, reservationData)
+            await emailConfirmReservation(mailData)
+        }
+
         res.status(200).json({ data })
 
     } catch (error) {
