@@ -1,5 +1,13 @@
 const { addDays } = require('date-fns')
-const { format } = require('date-fns-tz')
+const { format, toZonedTime } = require('date-fns-tz')
+
+// Funcion para obtener el dia actual en Colombia V2
+const getCurrentDateColombiaV2 = () => {
+    const timeZone = 'America/Bogota'
+    const currentDate = new Date()
+    const zonedDate = toZonedTime(currentDate, timeZone)
+    return format(zonedDate, 'yyyy-MM-dd')
+}
 
 // Funcion para obtener el dia actual en Colombia
 const getCurrentDateColombia = () => format(new Date(), 'yyyy-MM-dd HH:mm:ss', 'America/Bogota')
@@ -120,4 +128,4 @@ const formatTo12Hour = (time) => {
     return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`
 }
 
-module.exports = { generateEnabledDates, generateSchedule, parseTime, convertToBogotaDate, formatTo12Hour }
+module.exports = { generateEnabledDates, generateSchedule, parseTime, convertToBogotaDate, formatTo12Hour, getCurrentDateColombiaV2 }

@@ -80,17 +80,34 @@ Reservas.findAllDataByperson = async function (idTenant, idPersona, estado) {
                 model: Servicio,
                 as: 'servicio',
                 attributes: ['id','nombre'],
-                where: { estado: 'ACTIVO' }
             },
             {
                 model: Sede,
                 as: 'sede',
                 attributes: ['id','nombre'],
-                where: { estado: 'ACTIVO' }
             },
         ],
         attributes: ['id', 'idPersona', 'idTenant', 'fechaReserva', 'horaReserva'],
         where: { idTenant, idPersona, estado } 
+    })
+}
+
+Reservas.findOneDataByTenantPersonDate = async function (idTenant, idPersona, fechaReserva, estado) {    
+    return await Reservas.findOne({ 
+        include: [
+            {
+                model: Servicio,
+                as: 'servicio',
+                attributes: ['id','nombre'],
+            },
+            {
+                model: Sede,
+                as: 'sede',
+                attributes: ['id','nombre'],
+            },
+        ],
+        attributes: ['id', 'idPersona', 'idTenant', 'idServicio', 'idSede', 'fechaReserva', 'horaReserva', 'duracionReserva', 'estado'],
+        where: { idTenant, idPersona, fechaReserva, estado } 
     })
 }
 
