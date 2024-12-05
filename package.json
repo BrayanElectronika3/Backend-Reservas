@@ -19,12 +19,14 @@
     "dayjs-plugin-utc": "^0.1.2",
     "dayjs-timezone-iana-plugin": "^0.1.0",
     "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
     "express": "^4.21.1",
     "express-validator": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "mysql2": "^3.11.4",
     "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.16",
     "sequelize": "^6.37.5"
   },
   "devDependencies": {

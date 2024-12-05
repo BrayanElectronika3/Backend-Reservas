@@ -1,8 +1,50 @@
 const { matchedData } = require("express-validator") 
 const { handleHttpError } = require('../utils/handleError')
-const { reservasModel } = require('../models')
-const { parseTime, convertToBogotaDate, formatTo12Hour } = require('../utils/handleDate')
+const { reservasModel, personasModel } = require('../models')
+const { parseTime, convertToBogotaDate, formatTo12Hour, formatDateString } = require('../utils/handleDate')
+const { emailConfirmReservation } = require('../mails/reservas')
 
+// Consultar la persona por ID
+const getPersonData = async (personId) => {
+    try {
+        const dataPerson = await personasModel.findOneData(personId)
+        if (!dataPerson) throw new Error('Persona no encontrada')
+        return dataPerson.dataValues
+
+    } catch (error) {
+        console.error('Error al obtener datos de la persona:', error.message)
+        throw error
+    }
+}
+
+// Consultar la reserva por ID y IDTenant
+const getReservationData = async (reservationId, tenantId) => {
+    try {
+        const dataReservation = await reservasModel.findOneData(reservationId, tenantId)
+        if (!dataReservation) throw new Error('Reserva no encontrada')
+        return dataReservation.dataValues
+
+    } catch (error) {
+        console.error('Error al obtener datos de la reserva:', error.message)
+        throw error
+    }
+}
+
+// Construir el objeto necesario para el envio de correos de confirmacion de reservas
+const buildMailData = (personData, reservationData) => {
+    return {
+        to: personData.email,
+        subject: 'Reserva de Turno',
+        text: 'Confirmación reserva de turno',
+        name: `${personData?.primerNombre} ${personData?.primerApellido}`,
+        service: reservationData?.servicio?.nombre ?? 'Servicio no disponible',
+        headquearters: reservationData?.sede?.nombre ?? 'Sede no disponible',
+        dateReservation: formatDateString(reservationData?.fechaReserva),
+        timeReservation: formatTo12Hour(reservationData?.horaReserva),
+    }
+}
+
+// Validar el tipo de dato de la fecha
 const isValidDate = (date) => {
     const parsedDate = typeof date === 'string' ? new Date(date) : date
     return parsedDate instanceof Date && !isNaN(parsedDate)
@@ -116,6 +158,18 @@ const createItem = async (req, res) => {
         // Guardar el registro y retornar los datos
         const dataRecord = await reservasModel.create({ ...dataReq, idTenant })
         const { idTenant: tenant, createdAt, updatedAt, ...data } = dataRecord.dataValues
+
+        // Enviar la confirmacion de la reserva por correo
+        if (data?.idPersona && data?.id && idTenant) {
+            const [personData, reservationData] = await Promise.all([
+                getPersonData(data.idPersona),
+                getReservationData(data.id, idTenant),
+            ])
+
+            const mailData = buildMailData(personData, reservationData)
+            await emailConfirmReservation(mailData)
+        }
+
         res.status(201).json({ data })
 
     } catch (error) {
@@ -168,7 +222,7 @@ const updateItem = async (req, res) => {
         // Actualizar el registro
         await reservasModel.findByIdAndUpdate(id, dataReq)
 
-        // Consultar si ya existe una reserva
+        // Consultar el registro actualizado de la reserva
         const updatedRecord = await reservasModel.findOneData(id, idTenant)
         const { idTenant: tenant, createdAt, updatedAt, ...data } = updatedRecord.dataValues
         res.status(200).json({ data })

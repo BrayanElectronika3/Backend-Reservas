@@ -128,4 +128,13 @@ const formatTo12Hour = (time) => {
     return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`
 }
 
-module.exports = { generateEnabledDates, generateSchedule, parseTime, convertToBogotaDate, formatTo12Hour, getCurrentDateColombiaV2 }
+// Dar formato a la fecha en formato Day, Day de Month de Year
+const formatDateString = (dateString) => {
+    const [year, month, day] = dateString.split('-')
+    const date = new Date(Number(year), Number(month) - 1, Number(day))
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit' }
+    const dateStringConvert = new Intl.DateTimeFormat('es-ES', options).format(date)
+    return dateStringConvert.charAt(0).toUpperCase() + dateStringConvert.slice(1).toLowerCase()
+}
+
+module.exports = { generateEnabledDates, generateSchedule, parseTime, convertToBogotaDate, formatTo12Hour, getCurrentDateColombiaV2, formatDateString }

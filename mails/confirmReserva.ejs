@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen de la Reserva</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #5953a4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        .card h2 {
+            font-size: 30px;
+            font-weight: 800;
+            color: #333;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #383838;
+            text-align: left;
+            margin-bottom: 8px;
+        }
+
+        .card ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .card ul li {
+            font-size: 16px;
+            color: #383838;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 20px;
+            text-align: right;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="card">
+            <img src="https://img.freepik.com/free-vector/check-mark-hand-drawn-circle_78370-5986.jpg?t=st=1733414896~exp=1733418496~hmac=725e479542d8b850d551f5860cdea426e182b99092df5fb3822852a450e635ce&w=740" alt="check" width="80" height="80">
+            <h2>Resumen de la reserva</h2>
+            <p class="description">¡Hola! <%= name %>,</p>
+            <p class="description">A continuación te presentamos el resumen de la reserva</p>
+            <ul>
+                <li><strong>Servicio:</strong> <%= service %></li>
+                <li><strong>Sede:</strong> <%= headquearters %></li>
+                <li><strong>Fecha de la reserva:</strong> <%= dateReservation %></li>
+                <li><strong>Hora de la reserva:</strong> <%= timeReservation %></li>
+            </ul>
+            <div class="footer">Powered by ViTurno</div>
+        </div>
+    </body>
+</html>
