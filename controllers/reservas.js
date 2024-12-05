@@ -189,7 +189,7 @@ const getItemsPerson = async (req, res) => {
             return handleHttpError(res, 'The idPerson is not found', 400)
         }
 
-        const data = await reservasModel.findAllDataByperson(idTenant, idPerson, 'ACTIVO')
+        const data = await reservasModel.findAllDataByTenantPerson(idTenant, idPerson, 'ACTIVO')
 
         if (!data) { 
             return handleHttpError(res, 'Records by person not found', 404)

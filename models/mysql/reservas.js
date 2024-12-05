@@ -61,19 +61,34 @@ Reservas.findByIdAndUpdate = async function (id, body) {
     return await Reservas.update(body, { where: { id } })
 }
 
-Reservas.findOneDataByTenantPersonDate = async function (idTenant, idPersona, fechaReserva, estado) {
-    return await Reservas.findOne({ where: { idTenant, idPersona, estado, fechaReserva } })
+Reservas.findOneDataByTenantPersonDate = async function (idTenant, idPersona, fechaReserva, estado) {    
+    return await Reservas.findOne({ 
+        include: [
+            {
+                model: Servicio,
+                as: 'servicio',
+                attributes: ['id','nombre'],
+            },
+            {
+                model: Sede,
+                as: 'sede',
+                attributes: ['id','nombre'],
+            },
+        ],
+        attributes: ['id', 'idPersona', 'idTenant', 'idServicio', 'idSede', 'fechaReserva', 'horaReserva', 'duracionReserva', 'estado'],
+        where: { idTenant, idPersona, fechaReserva, estado } 
+    })
 }
 
 Reservas.findAllDataByTenantDates = async function (idTenant, fechasReserva, estado) {
     if (!Array.isArray(fechasReserva) || fechasReserva.length === 0) {
-        throw new Error("La lista de fechas de reserva debe ser un array no vacio.");
+        throw new Error("La lista de fechas de reserva debe ser un array no vacio.")
     }
 
     return await Reservas.findAll({ where: { idTenant, estado, fechaReserva: { [Op.in]: fechasReserva } } })
 }
 
-Reservas.findAllDataByperson = async function (idTenant, idPersona, estado) {    
+Reservas.findAllDataByTenantPerson = async function (idTenant, idPersona, estado) {    
     return await Reservas.findAll({ 
         include: [
             {
@@ -92,22 +107,16 @@ Reservas.findAllDataByperson = async function (idTenant, idPersona, estado) {
     })
 }
 
-Reservas.findOneDataByTenantPersonDate = async function (idTenant, idPersona, fechaReserva, estado) {    
-    return await Reservas.findOne({ 
-        include: [
-            {
-                model: Servicio,
-                as: 'servicio',
-                attributes: ['id','nombre'],
+Reservas.findAllDataByDate = async function (fechaLimite, estado) {
+    if (!fechaLimite) throw new Error("La fecha limite es requerida")
+
+    return await Reservas.findAll({
+        where: {
+            estado,
+            fechaReserva: {
+                [Op.lt]: fechaLimite,
             },
-            {
-                model: Sede,
-                as: 'sede',
-                attributes: ['id','nombre'],
-            },
-        ],
-        attributes: ['id', 'idPersona', 'idTenant', 'idServicio', 'idSede', 'fechaReserva', 'horaReserva', 'duracionReserva', 'estado'],
-        where: { idTenant, idPersona, fechaReserva, estado } 
+        },
     })
 }
 

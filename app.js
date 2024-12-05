@@ -18,3 +18,5 @@ app.use('/reservas/api', require('./routes'))
 app.listen(PORT, () => { console.log(`Server Online: http://localhost:${PORT}`) })
 
 dbConnectMySql()
+
+const cron = require('./schedules/reservas')
