@@ -11,7 +11,7 @@
             font-family: 'Nunito Sans', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #5953a4;
+            background-color: #999999;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,14 +23,30 @@
             border-radius: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-width: 500px;
-            padding: 2.5rem;
             text-align: center;
+        }
+
+        .header {
+            background-color: #5953a4;
+            padding: 1rem;
+            padding-bottom: 0.5rem;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .header img {
+            filter: brightness(0) invert(1);
+        }
+
+        .main {
+            padding: 1.5rem;
+            padding-bottom: 0rem;
         }
 
         .card h2 {
             font-size: 30px;
             font-weight: 800;
-            color: #333;
+            color: #ffffff;
             margin-top: 10px;
             margin-bottom: 10px;
         }
@@ -39,6 +55,7 @@
             font-size: 16px;
             color: #383838;
             text-align: left;
+            margin-top: 8px;
             margin-bottom: 8px;
         }
 
@@ -58,23 +75,28 @@
         .footer {
             font-size: 14px;
             color: #aaa;
-            margin-top: 20px;
             text-align: right;
+            padding: 0.5rem;
+            padding-right: 1rem;
         }
     </style>
     </head>
     <body>
         <div class="card">
-            <img src="https://img.freepik.com/free-vector/check-mark-hand-drawn-circle_78370-5986.jpg?t=st=1733414896~exp=1733418496~hmac=725e479542d8b850d551f5860cdea426e182b99092df5fb3822852a450e635ce&w=740" alt="check" width="80" height="80">
-            <h2>Resumen de la reserva</h2>
-            <p class="description">¡Hola! <%= name %>,</p>
-            <p class="description">A continuación te presentamos el resumen de la reserva</p>
-            <ul>
-                <li><strong>Servicio:</strong> <%= service %></li>
-                <li><strong>Sede:</strong> <%= headquearters %></li>
-                <li><strong>Fecha de la reserva:</strong> <%= dateReservation %></li>
-                <li><strong>Hora de la reserva:</strong> <%= timeReservation %></li>
-            </ul>
+            <div class="header">
+                <img src="https://cdn-icons-png.freepik.com/256/3987/3987195.png?semt=ais_hybrid" alt="check" width="100" height="100">
+                <h2>Resumen de la reserva</h2>
+            </div>
+            <main class="main">
+                <p class="description">¡Hola! <%= name %>,</p>
+                <p class="description">A continuación te presentamos el resumen de la reserva</p>
+                <ul>
+                    <li><strong>Servicio:</strong> <%= service %></li>
+                    <li><strong>Sede:</strong> <%= headquearters %></li>
+                    <li><strong>Fecha de la reserva:</strong> <%= dateReservation %></li>
+                    <li><strong>Hora de la reserva:</strong> <%= timeReservation %></li>
+                </ul>
+            </main>
             <div class="footer">Powered by ViTurno</div>
         </div>
     </body>
