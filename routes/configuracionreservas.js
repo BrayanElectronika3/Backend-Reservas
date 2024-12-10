@@ -7,13 +7,14 @@ const verifyRol = require("../middlewares/rol")
 
 const typeRol = ['SuperAdmin','Administrador','asesor' ]
 
-const { getItems, getItem, createItem, updateItem, getItemsConfig } = require('../controllers/configuracionreservas')
+const { getItems, getItem, createItem, updateItem, getItemsConfig, deleteItem } = require('../controllers/configuracionreservas')
 const { validatorGetItem } = require('../validators/configuracionreservas')
 
 router.get('/', verifyAuth, verifyIdTenant, verifyRol(typeRol), getItems)
 router.get("/parametrizacion", verifyAuth, verifyIdTenant, verifyRol(typeRol), getItemsConfig)
 router.get("/:id", verifyAuth, verifyIdTenant, verifyRol(typeRol), validatorGetItem, getItem)
 router.post("/", verifyAuth, verifyIdTenant, verifyRol(typeRol), createItem)
-router.patch("/:id", verifyAuth, verifyIdTenant, verifyRol(typeRol), updateItem)
+router.patch("/:id", verifyAuth, verifyIdTenant, verifyRol(typeRol), validatorGetItem, updateItem)
+router.delete("/:id", verifyAuth, verifyIdTenant, verifyRol(typeRol), validatorGetItem, deleteItem)
 
 module.exports = router

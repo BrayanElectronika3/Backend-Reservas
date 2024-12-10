@@ -87,7 +87,21 @@ ConfiguracionReservas.findOneData = async function (id, idTenant) {
 }
 
 ConfiguracionReservas.findAllData = async function (idTenant) {
-    return await ConfiguracionReservas.findAll({ where: { idTenant } })
+    return await ConfiguracionReservas.findAll({ 
+        include: [
+            {
+                model: Servicio,
+                as: 'servicio',
+                attributes: ['id','nombre'],
+            },
+            {
+                model: Sede,
+                as: 'sede',
+                attributes: ['id','nombre'],
+            },
+        ],
+        where: { idTenant } 
+    })
 }
 
 ConfiguracionReservas.findByIdAndUpdate = async function (id, body) {

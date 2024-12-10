@@ -43,7 +43,14 @@ const getItems = async (req, res) => {
             return handleHttpError(res, 'Records not found', 404)
         }
 
-        res.send({ data })
+        const plainData = data.map(item => item.toJSON());
+        const transformedData = plainData.map(({ servicio, sede, ...rest }) => ({
+            ...rest,
+            nombreServicio: servicio?.nombre,
+            nombreSede: sede?.nombre,
+        }))        
+
+        res.send({ data: transformedData })
 
     } catch (error) {
         console.error(`ERROR GET ITEMS CONFIGURATION RESERVATIONS: ${error.message}`)
@@ -224,4 +231,19 @@ const getItemsConfig = async (req, res) => {
     }
 }
 
-module.exports = { getItems, getItem, createItem, updateItem, getItemsConfig }
+// Controlador para eliminar una configuracion de reservas
+const deleteItem = async (req, res) => {
+    try {
+        const { tenant: idTenant} = req.headers
+        req = matchedData(req)
+        const { id } = req
+        const data = await configuracionReservasModel.destroy({ where: { id, idTenant } })        
+        res.send({ data })
+
+    } catch (error) {
+        console.error(`ERROR DELETE ITEM CONFIGURATION RESERVATIONS: ${error.message}`)
+        handleHttpError(res, "Error deleting configuration reservations data")
+    }
+}
+
+module.exports = { getItems, getItem, createItem, updateItem, getItemsConfig, deleteItem }
